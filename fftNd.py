@@ -2,8 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# define names for 
-names = 'abcdefghijklmnopqrstuvwxyz'
+letters = 'abcdefghijklmnopqrst'
 
 def __fftNd(input, signal_ndim=1, normalized=False, onesided=True, signal_sizes=(), is_rfft=False, is_inverse=False):
     
@@ -27,9 +26,42 @@ def __fftNd(input, signal_ndim=1, normalized=False, onesided=True, signal_sizes=
         return fft_func(**args)
 
     # If fft with more than 3 dimensions requested continue
-    # remaining_dims = signal_ndims-3
-    # dimension_names = list(names[0:input.ndim])
-    # named_tensor = tensor.refine_names(*dimension_names)
+    remaining_dims = signal_ndim-3
+    dimension_names = ['batch','chan']
+    dimension_names.extend([letters[i] for i in range(input.ndim-2)])
+    if is_rfft is False:
+        dimension_names[-1] = 'complex'
+    input = input.refine_names(*dimension_names)
+
+    if remaining_dims<3:
+        # Merge some dimensions in the batch dimension
+        input2 = input.align_to('batch','a','chan','...')
+        original_size = input2.shape
+
+        newSize = list([input2.shape[0]*input2.shape[1]])
+        newSize.extend(input2.shape[2:])
+        temp_names = input2.names
+        input2 = input2.rename(None).view(*newSize) 
+
+        args['input'] = input2
+        args['signal_ndim'] = 3
+        result1 = fft_func(**args)
+        result1 = result1.view(*original_size).refine_names(*temp_names)
+        result1 = result1.align_as(input)
+
+        input2 = result1.align_to('batch','b','c','d','chan','...')
+        original_size = input2.shape
+        newSize = list([input2.shape[0]*input2.shape[1]*input2.shape[2]*input2.shape[3]])
+        newSize.extend(input2.shape[4:])
+        temp_names = input2.names
+        input2 = input2.rename(None).view(*newSize) 
+
+        args['input'] = input2
+        args['signal_ndim'] = remaining_dims
+        result1 = fft_func(**args)
+        result1 = result1.view(*original_size).refine_names(*temp_names)
+        result1 = result1.align_as(input)
+
     return 0
 
 
