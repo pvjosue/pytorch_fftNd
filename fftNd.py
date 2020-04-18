@@ -58,6 +58,14 @@ def __fftNd(input, signal_ndim=1, normalized=False, onesided=True, is_rfft=False
             # remove complex dimension
             middle_size = middle_size[:-1]
             new_size = new_size[:-1]
+            args['onesided'] = onesided
+            if onesided:
+                middle_size[-1] += middle_size[-1]//2
+        if is_inverse == False and is_rfft and nDim == len(original_size)-last_dim-1:
+            fft_func = torch.irfft
+            # remove complex dimension
+            middle_size = middle_size[:-1]
+            new_size = new_size[:-1]
             args['onesided'] = False
 
         middle_result = fft_func(**args)
@@ -82,8 +90,13 @@ def rfftNd(input, signal_ndim=1, normalized=False, onesided=True):
     dims.extend([2])
     input = input.unsqueeze(input.ndim).repeat(dims)
     input[...,1] = 0
-    return __fftNd(input, signal_ndim=signal_ndim, normalized=normalized)
+    result = __fftNd(input, signal_ndim=signal_ndim, normalized=normalized)
+    if onesided:
+        result = result[...,:result.shape[-2]//2+1,:]
+    return result
 
 def irfftNd(input, signal_ndim=1, normalized=False, onesided=True, signal_sizes=()):
-    result = __fftNd(input, signal_ndim=signal_ndim, normalized=normalized, is_rfft=True, is_inverse=True)
+    result = __fftNd(input, signal_ndim=signal_ndim, normalized=normalized, onesided=onesided, is_rfft=True, is_inverse=True)
+    # if onesided:
+        # result = result[...,:result.shape[-2]//2+1,:]
     return result[...,0]

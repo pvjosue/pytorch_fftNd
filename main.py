@@ -45,7 +45,7 @@ x = torch.rand(1,1,5,5,2)
 # test 4D
 nDims = 4
 dim_sizes = [1,1]
-dim_sizes.extend(nDims*[2])
+dim_sizes.extend(nDims*[33])
 dim_sizes.extend([2])
 x = torch.rand(*dim_sizes).to(device)
 
@@ -70,13 +70,37 @@ Y[0,0,:,...,1] = torch.from_numpy(np.imag(yNumpy))
 diff = abs(y-Y).sum().item()
 # print(y)
 # print(Y)
-print('diff: ' + str(diff))
+print('\tdiff: ' + str(diff))
+
+# IFFT
+torch.cuda.synchronize()
+start = time.time()
+y = ifftNd(x,nDims)
+torch.cuda.synchronize()
+end = time.time()
+print("time: " + str(end-start))
+
+xNumpy = x[0,0,:,...,0].cpu().numpy() + x[0,0,:,...,1].cpu().numpy()* 1j
+
+start = time.time()
+yNumpy = np.fft.ifftn(xNumpy)
+end = time.time()
+print("time: " + str(end-start))
+
+Y = torch.zeros_like(x)
+Y[0,0,:,...,0] = torch.from_numpy(np.real(yNumpy))
+Y[0,0,:,...,1] = torch.from_numpy(np.imag(yNumpy))
+
+diff = abs(y-Y).sum().item()
+# print(y)
+# print(Y)
+print('\tdiff: ' + str(diff))
 
 
 # RFFT
 torch.cuda.synchronize()
 start = time.time()
-y = rfftNd(x[...,0],nDims)
+y = rfftNd(x[...,0],nDims,onesided=True)
 torch.cuda.synchronize()
 end = time.time()
 print("time: " + str(end-start))
@@ -88,20 +112,20 @@ yNumpy = np.fft.rfftn(xNumpy)
 end = time.time()
 print("time: " + str(end-start))
 
-Y = torch.zeros_like(x)
+Y = torch.zeros_like(y)
 Y[0,0,:,...,0] = torch.from_numpy(np.real(yNumpy))
 Y[0,0,:,...,1] = torch.from_numpy(np.imag(yNumpy))
 
 diff = abs(y-Y).sum().item()
 # print(y)
 # print(Y)
-print('diff: ' + str(diff))
+print('\tdiff: ' + str(diff))
 
 
 # irfft
 torch.cuda.synchronize()
 start = time.time()
-y = irfftNd(x,nDims)
+y = irfftNd(x,nDims, onesided=False)
 torch.cuda.synchronize()
 end = time.time()
 print("time: " + str(end-start))
@@ -109,14 +133,14 @@ print("time: " + str(end-start))
 xNumpy = x[0,0,:,...,0].cpu().numpy() + x[0,0,:,...,1].cpu().numpy()* 1j
 
 start = time.time()
-yNumpy = irfftn(xNumpy)
+yNumpy = irfftn(xNumpy, xNumpy.shape)#[...,:xNumpy.shape[-1]]
 end = time.time()
 print("time: " + str(end-start))
 
-Y = torch.zeros_like(x[...,0])
+Y = torch.zeros_like(y)
 Y[0,0,:,...] = torch.from_numpy(np.real(yNumpy))
 
 diff = abs(y-Y).sum().item()
 # print(y)
 # print(Y)
-print('diff: ' + str(diff))
+print('\tdiff: ' + str(diff))
