@@ -97,6 +97,4 @@ def rfftNd(input, signal_ndim=1, normalized=False, onesided=True):
 
 def irfftNd(input, signal_ndim=1, normalized=False, onesided=True, signal_sizes=()):
     result = __fftNd(input, signal_ndim=signal_ndim, normalized=normalized, onesided=onesided, is_rfft=True, is_inverse=True)
-    # if onesided:
-        # result = result[...,:result.shape[-2]//2+1,:]
     return result[...,0]

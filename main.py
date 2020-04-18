@@ -43,7 +43,7 @@ x = torch.rand(1,1,5,5,2)
 # y = irfftNd(y,2)
 
 # test 4D
-nDims = 4
+nDims = 6
 dim_sizes = [1,1]
 dim_sizes.extend(nDims*[33])
 dim_sizes.extend([2])
