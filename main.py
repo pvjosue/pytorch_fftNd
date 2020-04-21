@@ -133,9 +133,9 @@ print('\tirfftNd diff: ' + str(diff))
 
 ######### convNd with fourier
 def mulComplex(x, other):
-    outR = torch.sub(torch.mul(x[...,0], other[...,0]), torch.mul(x[...,1], other[...,1]))
-    outI = torch.add(torch.mul(x[...,0], other[...,1]), torch.mul(x[...,1], other[...,0]))
-    out = torch.cat((outR.unsqueeze(-1), outI.unsqueeze(-1)), outR.ndimension())
+    out = torch.zeros_like(x)
+    out[...,0] = torch.sub(torch.mul(x[...,0], other[...,0]), torch.mul(x[...,1], other[...,1]))
+    out[...,1] = torch.add(torch.mul(x[...,0], other[...,1]), torch.mul(x[...,1], other[...,0]))
     return out
 
 def fft_conv(A,B):
