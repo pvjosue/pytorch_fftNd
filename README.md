@@ -1,10 +1,11 @@
 # pytorch_fftNd
 An n-dimensional implementation of the Fast Fourier Transform and its inverse in Pytorch.
 The included functions are:
-* fftNd
-* ifftNd
-* rfftNd
-* irfftNd
+* `fftNd(input, signal_ndim=1, normalized=False)`
+* `ifftNd(input, signal_ndim=1, normalized=False, signal_sizes=())`
+* `rfftNd(input, signal_ndim=1, normalized=False, onesided=True)`
+* `irfftNd(input, signal_ndim=1, normalized=False, onesided=True, signal_sizes=())`
+These functions are working with all 
 
 ## Functionality
 The nD fourier transform is performed by applying _n_ 1D FFTs in a batch matter. This functions use Pytorch named tensors for aranging the dimensions in each 1D FFT.
