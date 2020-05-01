@@ -15,7 +15,7 @@ y = ifftNd(y,2)
 y = rfftNd(x[:,:,:,:,0],2)
 y = irfftNd(y,2)
 
-############# test 4D convs
+############# test nD FFT
 nDims = 6
 dim_sizes = [1,1]
 dim_sizes.extend(nDims*[5])
