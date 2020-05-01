@@ -1,4 +1,4 @@
-# pytorch_fftNd
+# fftNd
 An n-dimensional implementation of the Fast Fourier Transform and its inverse in Pytorch.
 The included functions are:
 * `fftNd(input, signal_ndim=1, normalized=False)`
